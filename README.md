@@ -177,7 +177,7 @@ Email → Parsing → Classification → Decision Engine → Action Execution �
 ![Task](Workflow_ScreenShots/Task_Reminder.png)
 
 ### 📊 Daily Summary
-![Summary](Workflow_ScreenShots/Daily_Summery.png)
+![Summary](Workflow_ScreenShots/Daily_Summary.png)
 
 ---
 
