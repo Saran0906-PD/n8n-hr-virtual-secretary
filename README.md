@@ -159,17 +159,22 @@ Email → Parsing → Classification → Decision Engine → Action Execution �
 
 ## 📸 Screenshots
 
-### Main Workflow
-Shows full automation pipeline from email intake to execution.
+## 📸 Workflow Screenshots
 
-### Meeting Automation
-Handles scheduling and conflict resolution.
+### 🧠 Main Workflow
+![Main](Workflow_ScreenShots/Main-Workflow.png)
 
-### Resume Analyzer
-AI-based resume scoring system.
+### 📅 Meeting Automation
+![Meeting](Workflow_ScreenShots/Meeting_Automation.png)
 
-### Task Reminder
-Automated notification system.
+### ✅ Meeting Confirmation
+![Confirmation](Workflow_ScreenShots/Meeting_Confirmation.png)
+
+### ⏰ Task Reminder
+![Task](Workflow_ScreenShots/Task_Reminder.png)
+
+### 📊 Daily Summary
+![Summary](Workflow_ScreenShots/Daily_Summery.png)
 
 ---
 
