@@ -26,7 +26,7 @@ Organizations and individuals receive a large number of emails daily. Manually:
 - Tracking tasks
 - Reviewing resumes  
 
-is inefficient and error-prone.
+is inefficient and error-prone..
 
 This system automates the entire process intelligently.
 
