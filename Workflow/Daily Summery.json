@@ -1,0 +1,105 @@
+{
+  "name": "Daily Summery",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d071d1f7-d321-42fc-a5e4-6789048d4baf",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  COUNT(*) AS total,\n  COUNT(*) FILTER (WHERE urgency = 'High') AS urgent,\n  COUNT(*) FILTER (WHERE category = 'Meeting') AS meetings,\n  COUNT(*) FILTER (WHERE category = 'Task') AS tasks\nFROM public.emails\nWHERE DATE(created_at) = CURRENT_DATE\nAND category IS NOT NULL;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        0
+      ],
+      "id": "7a23cad5-3b92-4caf-9c35-c8f45b409a43",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "53bbYTucDwNeS1GT",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7359615703",
+        "text": "={{ ` 📊 Daily Summary  📩 Emails Today: ${$json.total} 🔥 Urgent: ${$json.urgent} 📅 Meetings: ${$json.meetings} 📌 Tasks: ${$json.tasks}  — AI Assistant 🤖 ` }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "229735f4-f549-4e39-a12e-f9014ed19f4a",
+      "name": "Send a text message",
+      "webhookId": "21682a0e-42d1-4ca2-96d3-a14fbf6c27ae",
+      "credentials": {
+        "telegramApi": {
+          "id": "3Sz3nRY9bJX5LoTJ",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "756c4094-2586-4024-a971-b8f2b8b6c4d5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cf9d72f36111bb903d1ee974b63baf55a218b453dc6cd0a4bb6955dab1bd41c6"
+  },
+  "id": "OYbyTB4sURnY6dtt",
+  "tags": []
+}

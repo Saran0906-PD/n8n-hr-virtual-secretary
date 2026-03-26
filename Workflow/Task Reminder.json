@@ -1,0 +1,129 @@
+{
+  "name": "Task Reminder",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "822ebec1-f361-45c9-8a01-0b58525f4fc4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM public.tasks\nWHERE status = 'pending';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        0
+      ],
+      "id": "1fa58b1a-e59a-4a00-a941-120fa4bdc0ed",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "53bbYTucDwNeS1GT",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();\n\nconst days = [\"sunday\",\"monday\",\"tuesday\",\"wednesday\",\"thursday\",\"friday\",\"saturday\"];\nconst tomorrow = days[(days.indexOf(today) + 1) % 7];\n\nreturn items.filter(item => {\n  return item.json.deadline?.toLowerCase() === tomorrow;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "336618bf-b788-4ba2-a2a1-c5f1f521497c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "chatId": "7359615703",
+        "text": "={{\n`\n⏳ Reminder\n\nTask: ${$json.title}\nDeadline: ${$json.deadline}\n\nDue Tomorrow ⚠️\n`\n}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "4f2e668a-0091-440c-9c70-b08ee123329d",
+      "name": "Send a text message",
+      "webhookId": "6df70013-5941-467d-adac-a2a83470c64d",
+      "credentials": {
+        "telegramApi": {
+          "id": "3Sz3nRY9bJX5LoTJ",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a5fb0fa3-7a94-4a38-bd57-c3db2c7ec3cf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cf9d72f36111bb903d1ee974b63baf55a218b453dc6cd0a4bb6955dab1bd41c6"
+  },
+  "id": "FlqRcQYYASPE6m1a",
+  "tags": []
+}

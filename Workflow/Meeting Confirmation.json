@@ -1,0 +1,633 @@
+{
+  "name": "Meeting Confirmation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "subject:\"Meeting:\""
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        32
+      ],
+      "id": "2d0a020a-20e0-440f-a670-83b8abfba228",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zV8VYoFny4ZEJqOv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const text = ($json.text || $json.snippet || \"\").toLowerCase()\n\nlet choice = null\nconst match = text.match(/slot\\s*(\\d)/)\n\nif (match) {\n  choice = Number(match[1])\n}\n\n// 🔥 SUPER SAFE sender extraction (handles ALL cases)\nlet sender = \"unknown\"\n\n// Case 1: Simplified mode\nif ($json.From) {\n  const match = $json.From.match(/<(.+?)>/)\n  sender = match ? match[1] : $json.From\n}\n\n// Case 2: Parsed email format\nelse if ($json.from?.text) {\n  const match = $json.from.text.match(/<(.+?)>/)\n  sender = match ? match[1] : $json.from.text\n}\n\n// Case 3: Raw Gmail payload (attachments ON case)\nelse if ($json.payload?.headers) {\n  const fromHeader = $json.payload.headers.find(h => h.name === \"From\")\n  if (fromHeader) {\n    const match = fromHeader.value.match(/<(.+?)>/)\n    sender = match ? match[1] : fromHeader.value\n  }const text = ($json.snippet || \"\").toLowerCase()\n\nconst match = text.match(/slot\\s*(\\d)/)\nconst choice = match ? Number(match[1]) : null\n\n// extract sender from snippet\nlet sender = \"unknown\"\nconst emailMatch = ($json.snippet || \"\").match(/<(.+?)>/)\nif (emailMatch) sender = emailMatch[1]\n\nreturn {\n  json: {\n    sender,\n    choice\n  }\n}\n}\n\nreturn {\n  json: {\n    choice,\n    sender\n  }\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        32
+      ],
+      "id": "533e2dfd-bba7-4a43-87f6-138d0052fc9f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "meetings",
+          "mode": "list",
+          "cachedResultName": "meetings"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "sender",
+              "condition": "LIKE",
+              "value": "=%{{ $json.sender }}%"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        -112
+      ],
+      "id": "10a20fef-cf09-4bde-a4de-477bc2c8c069",
+      "name": "Select rows from a table",
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "53bbYTucDwNeS1GT",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json.sender.match(/<(.*?)>/)[1]}}",
+        "subject": "Meeting Confirmed",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width:600px; margin:auto; border:1px solid #e5e5e5; border-radius:8px; padding:24px; background:#ffffff;\">\n\n<h2 style=\"color:#1a73e8;\">Meeting Confirmation</h2>\n\n<p>Dear Participant,</p>\n\n<p>Your meeting request has been successfully scheduled. Please find the details below:</p>\n\n<table style=\"border-collapse:collapse; width:100%; margin-top:15px;\">\n<tr>\n<td style=\"padding:8px; font-weight:bold;\">Date & Time:</td>\n<td style=\"padding:8px;\">{{$node[\"Code in JavaScript1\"].json.selectedSlot}}</td>\n</tr>\n\n<tr>\n<td style=\"padding:8px; font-weight:bold;\">Organizer:</td>\n<td style=\"padding:8px;\">AI Meeting Assistant</td>\n</tr>\n\n<tr>\n<td style=\"padding:8px; font-weight:bold;\">Status:</td>\n<td style=\"padding:8px; color:green;\">Confirmed</td>\n</tr>\n</table>\n\n<p style=\"margin-top:20px;\">\nA Google Calendar invitation has been sent to you. Please check your calendar for full meeting details.\n</p>\n\n<hr style=\"margin:25px 0; border:none; border-top:1px solid #eee;\">\n\n<p style=\"font-size:12px; color:#666;\">\nThis message was generated automatically by the AI Meeting Assistant.\n</p>\n\n<p style=\"margin-top:20px;\">\nBest regards,<br>\n<strong>AI Meeting Assistant</strong>\n</p>\n\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2688,
+        -96
+      ],
+      "id": "5c04d8e8-c692-44e4-bab2-b3b75373e642",
+      "name": "Send a message",
+      "webhookId": "7b709328-7d3e-4de1-80f1-cac915d917a5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zV8VYoFny4ZEJqOv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "meetings",
+          "mode": "list",
+          "cachedResultName": "meetings"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "confirmed",
+            "id": "={{$node[\"Code in JavaScript2\"].json.id}}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "threadid",
+              "displayName": "threadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sender",
+              "displayName": "sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "slot1",
+              "displayName": "slot1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "slot2",
+              "displayName": "slot2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "slot3",
+              "displayName": "slot3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "slot4",
+              "displayName": "slot4",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2240,
+        -96
+      ],
+      "id": "8b27cb45-bc1c-4761-b0ac-0a3d7cacdb3b",
+      "name": "Update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "53bbYTucDwNeS1GT",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        2464,
+        -96
+      ],
+      "id": "7d4b8101-42dd-4bf9-9020-18f4e7f381d1",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.sender }}",
+        "subject": "Meeting Slot Unavaliable",
+        "message": "={{\n`\n<div style=\"font-family: Arial, sans-serif; max-width:600px; margin:auto; border:1px solid #e5e5e5; border-radius:8px; padding:24px; background:#ffffff;\">\n\n<h2 style=\"color:#d9534f;\">Meeting Slot Update</h2>\n\n<p>Hello,</p>\n\n${\n  !$json.availableSlots || $json.availableSlots.length === 0\n  ? \n  `<p>Sorry, all meeting slots for the next two days are already booked.</p>\n   <p>Please try again later for new availability.</p>`\n  :\n  `<p>The time slot you selected has already been booked.</p>\n\n  <p><strong>Here are the remaining available slots:</strong></p>\n\n  <ul>\n    ${\n      $json.availableSlots\n        .map((slot, index) => {\n          return `<li>Slot ${index + 1} – ${new Date(slot).toLocaleString()}</li>`\n        })\n        .join('')\n    }\n  </ul>\n\n  <p>Please reply with the slot number you prefer.</p>`\n}\n\n<p>Best regards,<br>AI Meeting Assistant</p>\n\n</div>\n`\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2224,
+        208
+      ],
+      "id": "9df65df0-4266-4a33-9e19-c899ff46f72f",
+      "name": "Send a message1",
+      "webhookId": "03546b84-1dbf-4a39-81ff-a5890103af49",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zV8VYoFny4ZEJqOv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "saranytperiyasamy@gmail.com",
+          "mode": "list",
+          "cachedResultName": "saranytperiyasamy@gmail.com"
+        },
+        "limit": 1,
+        "timeMin": "={{$json.selectedSlot}}",
+        "timeMax": "={{ new Date(new Date($json.selectedSlot).getTime() + 60*60*1000).toISOString() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1120,
+        -160
+      ],
+      "id": "33f04aec-e656-4644-8f41-732d31ed729a",
+      "name": "Get many events",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ExNTwzT14sKhUE6k",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "saranytperiyasamy@gmail.com",
+          "mode": "list",
+          "cachedResultName": "saranytperiyasamy@gmail.com"
+        },
+        "start": "={{$json.selectedSlot}}",
+        "end": "={{ new Date(new Date($json.selectedSlot).getTime() + 60*60*1000) }}",
+        "useDefaultReminders": false,
+        "additionalFields": {
+          "attendees": [
+            "={{$json.sender.match(/<(.*)>/)[1]}}"
+          ],
+          "summary": "=Meeting with {{$json.sender}}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2016,
+        -96
+      ],
+      "id": "da5402ba-153e-463a-a7d1-c7cc7e9f2bf7",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ExNTwzT14sKhUE6k",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "59e65190-d398-42c4-9728-4b72e2db0c38",
+              "leftValue": "={{$json.hasEvents.toString()}}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1792,
+        -48
+      ],
+      "id": "a37e7227-5591-4ca5-9819-86d0f2ad0564",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        672,
+        32
+      ],
+      "id": "772d7e94-ec43-4d20-a011-5d6f576d12f6",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "jsCode": "let selectedSlot = null\n\nif ($json.choice === 1) selectedSlot = $json.slot1\nif ($json.choice === 2) selectedSlot = $json.slot2\nif ($json.choice === 3) selectedSlot = $json.slot3\nif ($json.choice === 4) selectedSlot = $json.slot4\n\nif (selectedSlot) {\n  selectedSlot = new Date(selectedSlot).toISOString()\n}\n\nreturn {\n  json: {\n    ...$json,\n    selectedSlot\n  }\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        32
+      ],
+      "id": "fa156341-3e67-4486-8516-852c66ce7c44",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1952,
+        256
+      ],
+      "id": "1619803c-c83b-4af8-92e6-a777ac6dd611",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const selectedSlot = $json.selectedSlot\n\nconst events = $input.all()\n\n// get all booked slots\nconst bookedSlots = events\n  .map(e => e.json.start?.dateTime)\n  .filter(Boolean)\n  .map(t => new Date(t).getTime())\n\n// check selected slot\nconst hasEvents = bookedSlots.includes(\n  new Date(selectedSlot).getTime()\n)\n\n// all slots from DB\nconst slots = [\n  $json.slot1,\n  $json.slot2,\n  $json.slot3,\n  $json.slot4\n]\n\n// filter available slots\nconst availableSlots = slots.filter(slot => {\n  const time = new Date(slot).getTime()\n  return !bookedSlots.includes(time)\n})\n\nreturn [\n  {\n    json: {\n      ...$json,\n      hasEvents,\n      availableSlots\n    }\n  }\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -48
+      ],
+      "id": "d2f889b7-d2f6-407d-8043-1394c7a0028b",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1344,
+        -48
+      ],
+      "id": "14e110d2-b1e3-476a-b353-40a227bee3c7",
+      "name": "Merge2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select rows from a table": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Update rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8852b2ef-d544-4e85-ba58-02b67632a1f0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cf9d72f36111bb903d1ee974b63baf55a218b453dc6cd0a4bb6955dab1bd41c6"
+  },
+  "id": "pe0BXa5qTbGtrBDd",
+  "tags": []
+}
