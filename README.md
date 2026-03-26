@@ -1,5 +1,9 @@
-# 🤖 AI Email Automation Assistant  
-### Multi-Workflow Intelligent System
+![n8n](https://img.shields.io/badge/Automation-n8n-red)
+![AI](https://img.shields.io/badge/AI-Gemini-blue)
+![Database](https://img.shields.io/badge/Database-PostgreSQL-green)
+
+# 🤖AI-Powered HR Virtual Secretary using n8n
+###  🚀 Automated end-to-end email operations including meeting scheduling, task tracking, and AI-based resume screening — reducing manual effort by 90%.
 
 An intelligent AI-powered automation system that processes incoming emails and dynamically performs multiple tasks such as meeting scheduling, urgent alerting, resume analysis, task reminders, and daily summaries.
 
@@ -12,6 +16,7 @@ Managing emails manually for scheduling meetings, handling urgent requests, and 
 This project solves that problem by building a fully automated AI assistant using **n8n workflows**, integrating multiple services to understand and act on emails without human intervention.
 
 ---
+
 
 ## ❗ Problem Statement
 
@@ -26,6 +31,15 @@ is inefficient and error-prone.
 This system automates the entire process intelligently.
 
 ---
+
+## 🎯 Why This Project
+
+This project simulates a real-world HR automation system used in companies to:
+- Reduce manual workload
+- Improve response time
+- Automate repetitive decision-making
+
+It demonstrates skills in system design, automation, and AI integration.
 
 ## 💡 Key Features
 
@@ -244,6 +258,19 @@ Resume PDF
 This project demonstrates how AI and automation can be combined to build a powerful intelligent assistant capable of handling real-world workflows efficiently with minimal human intervention.
 
 ---
+## ▶️ How to Use
+
+1. Import JSON workflows into n8n
+2. Configure credentials:
+   - Gmail API
+   - Google Calendar API
+   - Telegram Bot
+3. Set up PostgreSQL database
+4. Activate workflows
+
+System will start processing emails automatically.
+
+
 
 ## 👨‍💻 Author
 
