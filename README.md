@@ -32,15 +32,6 @@ This system automates the entire process intelligently.
 
 ---
 
-## 🎯 Why This Project
-
-This project simulates a real-world HR automation system used in companies to:
-- Reduce manual workload
-- Improve response time
-- Automate repetitive decision-making
-
-It demonstrates skills in system design, automation, and AI integration.
-
 ## 💡 Key Features
 
 - 📧 Email-based automation using Gmail Trigger
@@ -170,8 +161,6 @@ Email → Parsing → Classification → Decision Engine → Action Execution �
 | timestamp | TIMESTAMP |
 
 ---
-
-## 📸 Screenshots
 
 ## 📸 Workflow Screenshots
 
