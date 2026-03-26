@@ -26,7 +26,7 @@ Organizations and individuals receive a large number of emails daily. Manually:
 - Tracking tasks
 - Reviewing resumes  
 
-is inefficient and error-prone..
+is inefficient and error-prone.
 
 This system automates the entire process intelligently.
 
@@ -228,25 +228,19 @@ Resume PDF
 - Managing multiple workflows simultaneously  
 - Avoiding duplicate bookings  
 - Correctly classifying email intent  
-- Handling asynchronous execution in n8n  
+- Handling asynchronous execution in n8n
 
 ---
-
 ## 📈 Future Improvements
 
 - NLP-based intent detection  
 - Multi-user support  
 - Web dashboard  
 - WhatsApp integration  
-- Voice assistant integration  
+- Voice assistant integration
 
 ---
 
-## 🏁 Conclusion
-
-This project demonstrates how AI and automation can be combined to build a powerful intelligent assistant capable of handling real-world workflows efficiently with minimal human intervention.
-
----
 ## ▶️ How to Use
 
 1. Import JSON workflows into n8n
@@ -259,6 +253,28 @@ This project demonstrates how AI and automation can be combined to build a power
 
 System will start processing emails automatically.
 
+---
+## 🎯 Why This Project Matters
+
+This project simulates a real-world HR automation system used in organizations to:
+- Reduce manual workload
+- Improve response time
+- Automate repetitive decision-making
+
+It demonstrates strong skills in:
+- System design
+- Workflow automation
+- AI integration
+- Backend logic handling
+
+---
+
+
+## 🏁 Conclusion
+
+This project demonstrates how AI and automation can be combined to build a powerful intelligent assistant capable of handling real-world workflows efficiently with minimal human intervention.
+
+---
 
 
 ## 👨‍💻 Author
